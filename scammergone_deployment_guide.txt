@@ -1,0 +1,716 @@
+# 🚀 ScammerGone Deployment Guide
+
+**Complete guide for deploying ScammerGone to various platforms**
+
+---
+
+## 📦 Download Package
+
+### **Method 1: Save Individual Files**
+Create a folder `scammergone-bot/` and save these files:
+
+1. **bot.js** - Copy the main bot code
+2. **package.json** - Copy dependencies file  
+3. **setup.js** - Copy setup script
+4. **.env.example** - Copy environment template
+5. **README.md** - Copy installation guide
+
+### **Method 2: Git Clone (when available)**
+```bash
+git clone https://github.com/your-username/scammergone-bot
+cd scammergone-bot
+```
+
+---
+
+## 🏠 Local Development Deployment
+
+### **Prerequisites**
+- Node.js 16.9.0+ installed
+- Discord account with admin permissions
+- Text editor (VS Code recommended)
+
+### **Step-by-Step Setup**
+
+#### **1. Prepare Files**
+```bash
+# Create project folder
+mkdir scammergone-bot
+cd scammergone-bot
+
+# Save all files from the package
+# (bot.js, package.json, setup.js, .env.example, README.md)
+```
+
+#### **2. Install Dependencies**
+```bash
+npm install
+```
+
+#### **3. Create Discord Application**
+1. Go to https://discord.com/developers/applications
+2. Click "New Application" → Name: "ScammerGone"
+3. Go to "Bot" → "Add Bot"
+4. **Important**: Enable these intents:
+   - ✅ Message Content Intent
+   - ✅ Server Members Intent
+   - ✅ Presence Intent
+5. Copy Bot Token (Reset Token → Copy)
+6. Go to "General Information" → Copy Application ID
+
+#### **4. Run Interactive Setup**
+```bash
+npm run setup
+```
+- Enter Discord Bot Token
+- Enter Client ID (Application ID)
+- Setup creates `.env` file and shows invite link
+
+#### **5. Invite Bot to Server**
+Use the invite link provided by setup with these permissions:
+- ✅ Read Messages/View Channels
+- ✅ Send Messages
+- ✅ Manage Messages
+- ✅ Ban Members
+- ✅ Use Slash Commands
+- ✅ Add Reactions
+- ✅ Embed Links
+
+#### **6. Start Bot**
+```bash
+npm start
+```
+
+#### **7. Configure in Discord**
+```bash
+/scammergone status          # Check bot is working
+/settings logchannel #alerts # Set logging channel
+/channels all true           # Monitor all channels
+/settings sensitivity medium # Set detection level
+```
+
+### **Development Mode**
+```bash
+# Auto-restart on file changes
+npm run dev
+```
+
+---
+
+## ☁️ Cloud Platform Deployments
+
+### **🚂 Railway.app (Recommended for Beginners)**
+
+#### **Why Railway?**
+- ✅ Free tier available
+- ✅ Easy GitHub integration
+- ✅ Automatic deployments
+- ✅ Built-in environment variables
+- ✅ Persistent storage
+
+#### **Deployment Steps**
+1. **Prepare Repository**:
+   ```bash
+   # Create GitHub repository with your bot files
+   git init
+   git add .
+   git commit -m "Initial ScammerGone bot"
+   git remote add origin https://github.com/yourusername/scammergone-bot
+   git push -u origin main
+   ```
+
+2. **Deploy on Railway**:
+   - Go to https://railway.app
+   - Sign up/login with GitHub
+   - Click "New Project" → "Deploy from GitHub repo"
+   - Select your scammergone-bot repository
+   - Railway auto-detects Node.js and deploys
+
+3. **Set Environment Variables**:
+   - Go to your project → Variables tab
+   - Add: `DISCORD_TOKEN` = your_bot_token
+   - Add: `CLIENT_ID` = your_client_id
+   - Click "Deploy"
+
+4. **Monitor Deployment**:
+   - Check "Deployments" tab for build status
+   - View logs in "Deployments" → Latest deployment
+   - Bot should show online in Discord
+
+#### **Railway Configuration**
+Create `railway.json` in your project:
+```json
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "npm start",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
+```
+
+---
+
+### **🟪 Heroku Deployment**
+
+#### **Prerequisites**
+- Heroku account (free tier available)
+- Heroku CLI installed
+
+#### **Deployment Steps**
+1. **Prepare for Heroku**:
+   ```bash
+   # Add Procfile
+   echo "web: node bot.js" > Procfile
+   
+   # Initialize git if not done
+   git init
+   git add .
+   git commit -m "Initial commit"
+   ```
+
+2. **Create Heroku App**:
+   ```bash
+   # Install Heroku CLI first
+   heroku login
+   heroku create your-scammergone-bot
+   ```
+
+3. **Set Environment Variables**:
+   ```bash
+   heroku config:set DISCORD_TOKEN=your_bot_token_here
+   heroku config:set CLIENT_ID=your_client_id_here
+   heroku config:set NODE_ENV=production
+   ```
+
+4. **Deploy**:
+   ```bash
+   git push heroku main
+   ```
+
+5. **Scale Dyno**:
+   ```bash
+   # Ensure one dyno is running
+   heroku ps:scale web=1
+   
+   # Check status
+   heroku ps
+   
+   # View logs
+   heroku logs --tail
+   ```
+
+#### **Heroku Configuration**
+The `Procfile` should contain:
+```
+web: node bot.js
+```
+
+---
+
+### **🌊 DigitalOcean Droplet**
+
+#### **Why DigitalOcean?**
+- ✅ Full control over server
+- ✅ $5/month basic droplet
+- ✅ Easy scaling
+- ✅ SSH access
+- ✅ Can run multiple bots
+
+#### **Deployment Steps**
+1. **Create Droplet**:
+   - Create account at https://digitalocean.com
+   - Create new Droplet
+   - Choose Ubuntu 22.04 LTS
+   - Basic plan: $5/month
+   - Add SSH key or password
+
+2. **Connect to Server**:
+   ```bash
+   ssh root@your_droplet_ip
+   ```
+
+3. **Install Node.js**:
+   ```bash
+   # Update system
+   apt update && apt upgrade -y
+   
+   # Install Node.js 18
+   curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+   apt-get install -y nodejs
+   
+   # Install PM2 for process management
+   npm install -g pm2
+   ```
+
+4. **Deploy Bot**:
+   ```bash
+   # Clone or upload your files
+   git clone https://github.com/yourusername/scammergone-bot
+   cd scammergone-bot
+   
+   # Install dependencies
+   npm install
+   
+   # Create .env file
+   nano .env
+   # Add your DISCORD_TOKEN and CLIENT_ID
+   
+   # Start with PM2
+   pm2 start bot.js --name "scammergone"
+   pm2 startup
+   pm2 save
+   ```
+
+5. **Monitor**:
+   ```bash
+   # View logs
+   pm2 logs scammergone
+   
+   # View status
+   pm2 status
+   
+   # Restart if needed
+   pm2 restart scammergone
+   ```
+
+#### **Automatic Updates**
+Create `update.sh` script:
+```bash
+#!/bin/bash
+cd /root/scammergone-bot
+git pull origin main
+npm install
+pm2 restart scammergone
+echo "ScammerGone updated successfully!"
+```
+
+---
+
+### **🐳 Docker Deployment**
+
+#### **Why Docker?**
+- ✅ Consistent environment
+- ✅ Easy deployment
+- ✅ Portable between systems
+- ✅ Isolated from host system
+
+#### **Docker Files**
+Create `Dockerfile`:
+```dockerfile
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production
+
+# Copy source code
+COPY . .
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nodejs -u 1001
+USER nodejs
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node -e "console.log('Health check passed')" || exit 1
+
+# Start bot
+CMD ["npm", "start"]
+```
+
+Create `docker-compose.yml`:
+```yaml
+version: '3.8'
+
+services:
+  scammergone:
+    build: .
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - .env
+    volumes:
+      # Persist bot data
+      - ./data:/app/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+```
+
+#### **Deployment Commands**
+```bash
+# Build and start
+docker-compose up -d
+
+# View logs
+docker-compose logs -f scammergone
+
+# Stop
+docker-compose down
+
+# Update
+docker-compose build --no-cache
+docker-compose up -d
+```
+
+---
+
+## 🔧 Production Configuration
+
+### **Environment Variables**
+Essential variables for production:
+```bash
+# Required
+DISCORD_TOKEN=your_bot_token_here
+CLIENT_ID=your_client_id_here
+
+# Optional but recommended
+NODE_ENV=production
+LOG_LEVEL=info
+TZ=America/New_York  # Your timezone
+```
+
+### **PM2 Production Setup**
+Create `ecosystem.config.js`:
+```javascript
+module.exports = {
+  apps: [{
+    name: 'scammergone',
+    script: 'bot.js',
+    instances: 1,
+    exec_mode: 'fork',
+    watch: false,
+    max_memory_restart: '500M',
+    env: {
+      NODE_ENV: 'development'
+    },
+    env_production: {
+      NODE_ENV: 'production',
+      LOG_LEVEL: 'info'
+    },
+    error_file: './logs/err.log',
+    out_file: './logs/out.log',
+    log_file: './logs/combined.log',
+    time: true
+  }]
+};
+```
+
+Start with:
+```bash
+pm2 start ecosystem.config.js --env production
+```
+
+### **Nginx Reverse Proxy (Optional)**
+For web dashboard access:
+```nginx
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+
+---
+
+## 📊 Monitoring & Maintenance
+
+### **Health Monitoring**
+Create `health-check.js`:
+```javascript
+const { Client, GatewayIntentBits } = require('discord.js');
+
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds]
+});
+
+client.once('ready', () => {
+    console.log('✅ Bot is healthy');
+    process.exit(0);
+});
+
+client.on('error', () => {
+    console.log('❌ Bot is unhealthy');
+    process.exit(1);
+});
+
+setTimeout(() => {
+    console.log('❌ Health check timeout');
+    process.exit(1);
+}, 10000);
+
+client.login(process.env.DISCORD_TOKEN);
+```
+
+### **Log Rotation**
+```bash
+# Install logrotate
+sudo apt install logrotate
+
+# Create logrotate config
+sudo nano /etc/logrotate.d/scammergone
+```
+
+Content for logrotate config:
+```
+/path/to/scammergone-bot/logs/*.log {
+    daily
+    missingok
+    rotate 14
+    compress
+    delaycompress
+    notifempty
+    create 0644 nodejs nodejs
+}
+```
+
+### **Backup Script**
+Create `backup.sh`:
+```bash
+#!/bin/bash
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_DIR="/backups/scammergone"
+
+# Create backup directory
+mkdir -p $BACKUP_DIR
+
+# Backup configuration and learning data
+tar -czf "$BACKUP_DIR/scammergone_backup_$DATE.tar.gz" \
+    .env \
+    guild_configs.json \
+    learning_data.json
+
+# Keep only last 30 days of backups
+find $BACKUP_DIR -name "*.tar.gz" -mtime +30 -delete
+
+echo "Backup completed: scammergone_backup_$DATE.tar.gz"
+```
+
+### **Monitoring Commands**
+```bash
+# Check bot status
+pm2 status scammergone
+
+# View real-time logs
+pm2 logs scammergone --lines 100
+
+# Monitor resources
+pm2 monit
+
+# Restart if needed
+pm2 restart scammergone
+
+# View bot info in Discord
+/scammergone status
+```
+
+---
+
+## 🚨 Troubleshooting Production Issues
+
+### **Common Issues & Solutions**
+
+#### **Bot Goes Offline Randomly**
+```bash
+# Check PM2 logs
+pm2 logs scammergone
+
+# Common causes:
+# 1. Memory limit exceeded
+pm2 restart scammergone --max-memory-restart 400M
+
+# 2. Discord API rate limiting
+# Add delays in bot code
+
+# 3. Network issues
+# Check server connectivity
+```
+
+#### **High Memory Usage**
+```bash
+# Monitor memory
+pm2 monit
+
+# Solutions:
+# 1. Regular restart
+pm2 restart scammergone
+
+# 2. Set memory limit
+pm2 restart scammergone --max-memory-restart 500M
+
+# 3. Clear old learning data
+/learning clear (in Discord)
+```
+
+#### **Slash Commands Not Working**
+```bash
+# Check bot permissions in Discord
+# Ensure "Use Slash Commands" permission
+
+# Re-register commands
+# Restart bot: pm2 restart scammergone
+
+# Check Discord API status
+# https://discordstatus.com/
+```
+
+### **Emergency Procedures**
+
+#### **Bot Compromised**
+1. **Immediate Actions**:
+   ```bash
+   # Stop bot immediately
+   pm2 stop scammergone
+   
+   # Revoke token in Discord Developer Portal
+   # Generate new token
+   ```
+
+2. **Recovery**:
+   ```bash
+   # Update .env with new token
+   nano .env
+   
+   # Restart bot
+   pm2 start scammergone
+   
+   # Check bot is online
+   pm2 logs scammergone
+   ```
+
+#### **False Ban Wave**
+1. **Disable Protection**:
+   ```
+   /scammergone disable
+   ```
+
+2. **Clear Violations**:
+   ```
+   /violations clear @user1
+   /violations clear @user2
+   ```
+
+3. **Adjust Settings**:
+   ```
+   /settings sensitivity low
+   /settings banthreshold 5
+   ```
+
+4. **Re-enable When Safe**:
+   ```
+   /scammergone enable
+   ```
+
+---
+
+## 📈 Scaling for Large Servers
+
+### **High-Traffic Optimizations**
+
+#### **For 10k+ Member Servers**
+```javascript
+// Add to bot.js - Rate limiting
+const rateLimit = new Map();
+
+// Before processing messages
+if (rateLimit.has(message.author.id)) {
+    return; // Skip if user recently checked
+}
+
+rateLimit.set(message.author.id, Date.now());
+setTimeout(() => rateLimit.delete(message.author.id), 5000);
+```
+
+#### **Memory Optimization**
+```bash
+# Increase Node.js memory limit
+node --max-old-space-size=1024 bot.js
+
+# Or with PM2
+pm2 start bot.js --node-args="--max-old-space-size=1024"
+```
+
+#### **Database Integration (Advanced)**
+For very large servers, consider adding MongoDB:
+```bash
+npm install mongodb
+
+# Add to bot.js
+const { MongoClient } = require('mongodb');
+// Store learning data and configs in MongoDB
+```
+
+### **Multi-Server Setup**
+For hosting multiple bot instances:
+```bash
+# Create separate PM2 processes
+pm2 start bot.js --name "scammergone-server1" --env production
+pm2 start bot.js --name "scammergone-server2" --env production
+
+# Use different .env files
+cp .env .env.server1
+cp .env .env.server2
+```
+
+---
+
+## 🎯 Success Checklist
+
+### **Pre-Deployment**
+- [ ] All files saved correctly
+- [ ] Dependencies installed (`npm install`)
+- [ ] Discord bot created with proper intents
+- [ ] Bot token and client ID obtained
+- [ ] Setup script completed (`npm run setup`)
+
+### **Deployment**
+- [ ] Bot invited to server with correct permissions
+- [ ] Bot shows online in Discord
+- [ ] Slash commands responding (`/scammergone status`)
+- [ ] Log channel configured (`/settings logchannel`)
+- [ ] Detection working (`/scammergone test`)
+
+### **Production**
+- [ ] Process manager configured (PM2/Docker)
+- [ ] Environment variables secure
+- [ ] Logging configured
+- [ ] Monitoring set up
+- [ ] Backup system in place
+- [ ] Team trained on slash commands
+
+### **Testing**
+- [ ] Bot detects test scam messages
+- [ ] Learning system working (🙅‍♀️ reactions)
+- [ ] False positive correction (✅ reactions)
+- [ ] Ban system functioning
+- [ ] Log messages appearing correctly
+
+---
+
+**🛡️ Congratulations! ScammerGone is now protecting your Discord server with professional deployment!**
+
+---
+
+*Need help? Check the main README.md for troubleshooting or create an issue on GitHub.*

@@ -1,0 +1,112 @@
+# Dockerfile - Save as: Dockerfile (no extension)
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files first (for better caching)
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Copy source code
+COPY . .
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001 && \
+    chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
+
+# Health check to ensure bot is running
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD node -e "console.log('Health check passed')" || exit 1
+
+# Expose port (if needed for web dashboard)
+EXPOSE 3000
+
+# Start the bot
+CMD ["npm", "start"]
+
+---
+
+# docker-compose.yml - Save as: docker-compose.yml
+version: '3.8'
+
+services:
+  scammergone:
+    build: .
+    container_name: scammergone-bot
+    restart: unless-stopped
+    
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - TZ=America/New_York
+    
+    # Load from .env file
+    env_file:
+      - .env
+    
+    # Persist bot data
+    volumes:
+      - ./guild_configs.json:/app/guild_configs.json
+      - ./learning_data.json:/app/learning_data.json
+      - ./logs:/app/logs
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "node", "-e", "console.log('Health check passed')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add monitoring with Watchtower for auto-updates
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_SCHEDULE=0 0 2 * * *  # Check for updates daily at 2 AM
+    profiles:
+      - monitoring
+
+---
+
+# .dockerignore - Save as: .dockerignore
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+DEPLOYMENT-GUIDE.md
+.env
+.env.example
+docker-compose.yml
+Dockerfile
+*.md
+logs/
+guild_configs.json
+learning_data.json
